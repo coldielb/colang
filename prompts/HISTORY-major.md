@@ -311,21 +311,229 @@ The implementation is complete when:
 
 The goal is a working compiler that can handle simple COLANG programs end-to-end, providing a solid foundation for future language features and optimizations.
 
-⏺ Perfect! The COLANG compiler now has a fully functional parser that successfully:
+# COLANG Third Prompt
 
-  ✅ Parses COLANG programs end-to-end✅ Generates comprehensive AST output✅ Integrates with the CLI framework✅ Handles all major COLANG syntax constructs
+The COLANG parser is now fully functional and can parse complete programs into AST. Your next task is to implement the semantic analysis phase to make the compiler actually useful for catching errors and preparing for code generation.
 
-  The compiler successfully parsed our test program test_simple.co which contains:
-  - Function declaration (fn main())
-  - Type inference with := operator (let x := 42)
-  - Explicit type annotations (let y: i32 = 10)
-  - Return statements with expressions (return x + y)
+## Current Status Assessment
 
-  The AST output shows the parser correctly identified:
-  - Function declaration with parameter list and body
-  - Let statements with pattern matching
-  - Type nodes (I32)
-  - Binary expressions with proper operator parsing
-  - Integer literals
+**✅ Completed:**
+- Working lexer with all COLANG tokens
+- Complete recursive descent parser with operator precedence
+- Comprehensive AST generation for all major language constructs
+- CLI integration with AST pretty-printing
+- Basic error handling and span tracking
 
-  All core parser functionality is now complete and working as specified in the original requirements.
+**🎯 Current Objective:**
+Implement a working semantic analyzer that can type-check simple COLANG programs and catch common programming errors.
+
+## Implementation Priority: Type Checker + Symbol Table
+
+### Phase 2A: Symbol Table Implementation
+
+**File: `src/semantics/symbol_table.rs`**
+
+Implement a complete symbol table system:
+
+```rust
+pub struct SymbolTable {
+    scopes: Vec<Scope>,
+    current_scope: ScopeId,
+}
+
+pub struct Scope {
+    parent: Option<ScopeId>,
+    symbols: HashMap<String, Symbol>,
+    scope_type: ScopeType,
+}
+
+pub struct Symbol {
+    name: String,
+    symbol_type: SymbolType,
+    type_info: TypeInfo,
+    span: Span,
+    is_mutable: bool,
+}
+```
+
+**Key Requirements:**
+- Support nested scopes (functions, blocks, modules)
+- Track variable declarations and their types
+- Handle function signatures and parameters
+- Support forward declarations
+- Detect duplicate symbol declarations
+- Implement proper scope resolution rules
+
+### Phase 2B: Type Checker Implementation
+
+**File: `src/semantics/type_checker.rs`**
+
+Implement type checking with these capabilities:
+
+**Essential Features:**
+1. **Type inference for `:=` assignments**
+   ```colang
+   let x := 42;        // infer i32
+   let y := 3.14;      // infer f64
+   let z := "hello";   // infer str
+   ```
+
+2. **Type compatibility checking**
+   ```colang
+   let x: i32 = 42;    // OK
+   let y: i32 = 3.14;  // ERROR: type mismatch
+   ```
+
+3. **Function signature validation**
+   ```colang
+   fn add(a: i32, b: i32) -> i32 {
+       return a + b;    // OK: returns i32
+   }
+   ```
+
+4. **Binary operator type checking**
+   ```colang
+   let result = 5 + 3;     // OK: i32 + i32 -> i32
+   let bad = 5 + "hello";  // ERROR: type mismatch
+   ```
+
+**Implementation Strategy:**
+- Walk the AST using the visitor pattern
+- Build symbol table in first pass
+- Type check expressions in second pass
+- Collect all errors before reporting (don't stop at first error)
+- Provide helpful error messages with suggestions
+
+### Phase 2C: Integration with Main Compiler
+
+**File: `src/main.rs`**
+
+Update the compilation pipeline:
+
+```rust
+fn compile_file(args: CompileArgs, verbose: bool) -> Result<()> {
+    // ... existing parsing code ...
+
+    // 3. Semantic analysis
+    if verbose {
+        println!("Starting semantic analysis...");
+    }
+
+    let mut symbol_table = SymbolTable::new();
+    let mut type_checker = TypeChecker::new(&mut symbol_table);
+
+    let semantic_result = type_checker.check_program(&program);
+
+    match semantic_result {
+        Ok(_) => {
+            if verbose {
+                println!("✓ Semantic analysis passed");
+            }
+        }
+        Err(errors) => {
+            println!("Semantic errors found:");
+            for error in errors {
+                println!("  {}", error);
+            }
+            return Err(anyhow::anyhow!("Compilation failed due to semantic errors"));
+        }
+    }
+
+    // ... rest of pipeline ...
+}
+```
+
+## Test Cases to Implement
+
+Create these test programs to validate your implementation:
+
+**Test 1: Basic Type Inference (`tests/semantic/type_inference.co`)**
+```colang
+fn main() {
+    let x := 42;           // Should infer i32
+    let y := x + 10;       // Should infer i32
+    let z: i64 = x;        // Should error: cannot assign i32 to i64
+}
+```
+
+**Test 2: Function Type Checking (`tests/semantic/functions.co`)**
+```colang
+fn add(a: i32, b: i32) -> i32 {
+    return a + b;          // Should pass
+}
+
+fn main() {
+    let result = add(5, 10);    // Should infer i32
+    let bad = add(5);           // Should error: wrong argument count
+}
+```
+
+**Test 3: Scope Resolution (`tests/semantic/scopes.co`)**
+```colang
+fn main() {
+    let x := 10;
+    {
+        let x := "hello";  // Shadow outer x
+        // x is string here
+    }
+    // x is i32 here
+    let y := x + 5;        // Should work
+}
+```
+
+## Error Messages to Implement
+
+Provide clear, helpful error messages:
+
+```
+error: type mismatch
+  --> test.co:3:14
+   |
+ 3 |     let x: i32 = "hello";
+   |                  ^^^^^^^ expected `i32`, found `str`
+   |
+help: try converting the string to an integer with `parse()`
+
+error: undefined variable `z`
+  --> test.co:5:9
+   |
+ 5 |     let y = z + 1;
+   |             ^ not found in this scope
+   |
+help: did you mean `x`?
+
+error: function `add` expects 2 arguments, found 1
+  --> test.co:8:5
+   |
+ 8 |     add(5);
+   |     ^^^^^^ help: add missing argument: `add(5, /* i32 */)`
+```
+
+## Success Criteria
+
+Your implementation is complete when:
+
+1. **Basic type checking works** - Can catch type mismatches in assignments and operations
+2. **Type inference works** - Correctly infers types for `:=` declarations
+3. **Symbol resolution works** - Properly handles variable scoping and shadowing
+4. **Function checking works** - Validates function calls match signatures
+5. **Error reporting works** - Provides clear error messages with source locations
+6. **Integration works** - Semantic analysis runs as part of compilation pipeline
+
+## Quality Requirements
+
+- **No panics**: Use proper error handling throughout
+- **Comprehensive error collection**: Don't stop at first error, collect all semantic errors
+- **Performance**: Should handle reasonably large programs efficiently
+- **Extensibility**: Design for easy addition of new type checking rules
+- **Testing**: Include unit tests for major semantic analysis functions
+
+## Implementation Notes
+
+- Focus on correctness over performance initially
+- Start with basic types (integers, floats, booleans, strings) before complex types
+- Implement ownership checking in a separate phase (Phase 3)
+- Use the existing `Diagnostic` system for error reporting
+- Leverage the AST visitor pattern for tree traversal
+
+Once this phase is complete, the compiler will be able to catch most common programming errors and provide a solid foundation for code generation.

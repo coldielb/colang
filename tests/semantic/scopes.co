@@ -1,0 +1,9 @@
+fn main() {
+    let x := 10;
+    {
+        let x := "hello";  // Shadow outer x
+        // x is string here
+    }
+    // x is i32 here
+    let y := x + 5;        // Should work
+}

@@ -1,0 +1,4 @@
+fn main() {
+    let x = y + 1;        // Should error: undefined variable y
+    let z := undefined_func(); // Should error: undefined function
+}

@@ -1,0 +1,9 @@
+fn add(a: i32, b: i32) -> i32 {
+    return a + b;          // Should pass
+}
+
+fn main() {
+    let result = add(5, 10);    // Should infer i32
+    let bad = add(5);           // Should error: wrong argument count
+    let also_bad = add("hello", 10); // Should error: wrong argument type
+}

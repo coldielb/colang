@@ -146,9 +146,26 @@ fn compile_file(args: CompileArgs, verbose: bool) -> Result<()> {
         println!("AST:\n{}", ast_output);
     }
     
-    // 3. Semantic analysis (not yet implemented)
+    // 3. Semantic analysis
     if verbose {
-        println!("Semantic analysis not yet implemented");
+        println!("Starting semantic analysis...");
+    }
+    
+    let mut type_checker = semantics::TypeChecker::new();
+    match type_checker.check_program(&program) {
+        Ok(()) => {
+            if verbose {
+                println!("✓ Semantic analysis passed");
+                println!("Symbol table:\n{}", type_checker.symbol_table().debug_print());
+            }
+        },
+        Err(errors) => {
+            println!("Semantic errors found:");
+            for error in &errors {
+                println!("  {}", error);
+            }
+            return Err(anyhow::anyhow!("Compilation failed due to semantic errors"));
+        }
     }
     
     // 4. IR generation (not yet implemented)
@@ -199,12 +216,28 @@ fn check_file(args: CheckArgs, verbose: bool) -> Result<()> {
         println!("Successfully parsed program with {} items", program.len());
     }
     
-    // 3. Semantic analysis (not yet implemented)
+    // 3. Semantic analysis
     if verbose {
-        println!("Semantic analysis not yet implemented");
+        println!("Starting semantic analysis...");
     }
     
-    println!("✓ COLANG program is syntactically valid!");
+    let mut type_checker = semantics::TypeChecker::new();
+    match type_checker.check_program(&program) {
+        Ok(()) => {
+            if verbose {
+                println!("✓ Semantic analysis passed");
+            }
+        },
+        Err(errors) => {
+            println!("Semantic errors found:");
+            for error in &errors {
+                println!("  {}", error);
+            }
+            return Err(anyhow::anyhow!("Type checking failed"));
+        }
+    }
+    
+    println!("✓ COLANG program is semantically valid!");
     Ok(())
 }
 

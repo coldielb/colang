@@ -1,0 +1,5 @@
+fn main() {
+    let x := 42;           // Should infer i32
+    let y := x + 10;       // Should infer i32
+    let z: i64 = x;        // Should error: cannot assign i32 to i64
+}
