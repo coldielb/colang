@@ -8,8 +8,10 @@ mod ast;
 mod semantics;
 mod ir;
 mod codegen;
-mod std as colang_std;
 mod util;
+
+#[path = "std/mod.rs"]
+mod colang_std;
 
 #[derive(Parser)]
 #[command(

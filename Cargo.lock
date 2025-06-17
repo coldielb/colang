@@ -199,6 +199,7 @@ dependencies = [
  "clap",
  "colored",
  "criterion",
+ "lazy_static",
  "logos",
  "pretty_assertions",
  "proptest",
