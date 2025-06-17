@@ -2,7 +2,8 @@ use logos::Logos;
 use std::fmt;
 use thiserror::Error;
 
-use crate::lexer::token::{Token, TokenType, Span};
+use crate::lexer::token::{Token, TokenType};
+use crate::util::Span;
 
 #[derive(Error, Debug, Clone)]
 pub enum LexError {
@@ -175,9 +176,18 @@ impl<'source> Lexer<'source> {
 
 impl<'source> Clone for Lexer<'source> {
     fn clone(&self) -> Self {
+        let mut new_lexer = TokenType::lexer(self.source);
+        // Skip to the current position
+        let current_pos = self.lexer.span().start;
+        while new_lexer.span().start < current_pos {
+            if new_lexer.next().is_none() {
+                break;
+            }
+        }
+        
         Self {
             source: self.source,
-            lexer: TokenType::lexer(self.source).spanned(self.lexer.span()),
+            lexer: new_lexer,
             current_line: self.current_line,
             current_column: self.current_column,
             line_starts: self.line_starts.clone(),

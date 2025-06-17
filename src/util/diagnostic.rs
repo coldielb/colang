@@ -1,6 +1,5 @@
 use crate::util::{Span, error::*};
 use colored::*;
-use std::fmt;
 
 /// Diagnostic renderer for pretty-printing compiler errors and warnings
 pub struct DiagnosticRenderer {

@@ -22,3 +22,24 @@ Development Practices:
 - Consider future extensibility when designing interfaces
 - Profile performance-critical code paths and optimize based on data
 - Maintain backward compatibility once features are stabilized
+
+No Placeholder Code:
+
+- Replace all TODO: comments with actual implementations
+- Every function must have a complete, working implementation
+- Use unimplemented!() macro only for features explicitly marked as future work
+- Provide meaningful error messages, not generic stubs
+
+Comprehensive Testing:
+
+- Write unit tests for each major component
+- Include integration tests for complete compilation pipeline
+- Test error cases and edge conditions
+- Add property-based tests using proptest for parser
+
+Error Handling:
+
+- Never use unwrap() or expect() in production code paths
+- Implement proper error propagation using Result types
+- Provide detailed diagnostic information for all errors
+- Include span information for precise error location

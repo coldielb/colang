@@ -18,7 +18,7 @@ pub enum CompilerError {
     Codegen(#[from] CodegenError),
     
     #[error("I/O error: {0}")]
-    Io(#[from] std::io::Error),
+    Io(String),
     
     #[error("Internal compiler error: {message}")]
     Internal { message: String },

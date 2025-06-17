@@ -165,7 +165,9 @@ pub trait Visitor<T = ()> {
             },
             Declaration::Module { items, .. } => {
                 for item in items {
-                    self.visit_item(item);
+                    match item {
+                        Item::Declaration(decl) => self.visit_declaration(decl),
+                    };
                 }
             },
             Declaration::Use { .. } => {

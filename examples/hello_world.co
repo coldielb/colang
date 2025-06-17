@@ -1,0 +1,66 @@
+// Hello World program in COLANG
+// Demonstrates basic syntax and ownership semantics
+
+use std::io;
+
+fn main() {
+    let message := "Hello, COLANG!";
+    println(message);
+    
+    // Ownership transfer example
+    let owned_data: own String = alloc_string("Dynamic data");
+    let borrowed_data: ref String = &owned_data;
+    
+    process_data(owned_data); // Move ownership
+    // owned_data is no longer accessible here
+    
+    // Reference example
+    let x := 42;
+    let y: ref i32 = &x;
+    println("Value: {}", *y);
+}
+
+fn process_data(data: own String) {
+    println("Processing: {}", data);
+    // data is automatically deallocated when function ends
+}
+
+fn alloc_string(s: &str) -> own String {
+    // This would allocate a new string on the heap
+    String::from(s)
+}
+
+// Trait example
+trait Display {
+    fn display(&self) -> String;
+}
+
+// Struct with ownership annotations
+struct Person {
+    name: own String,
+    age: i32,
+}
+
+impl Display for Person {
+    fn display(&self) -> String {
+        format!("{} ({})", self.name, self.age)
+    }
+}
+
+// Generic function with constraints
+fn print_displayable<T>(item: ref T) where T: Display {
+    println("{}", item.display());
+}
+
+// Error handling with 'or return'
+fn divide(a: i32, b: i32) -> Result<i32, String> {
+    if b == 0 {
+        return Err("Division by zero");
+    }
+    Ok(a / b)
+}
+
+fn safe_divide(a: i32, b: i32) -> i32 {
+    let result = divide(a, b) or return 0;
+    result
+}

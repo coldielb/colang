@@ -1,28 +1,6 @@
 use logos::Logos;
 use std::fmt;
-
-/// Position information for tokens in the source code
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Span {
-    pub start: usize,
-    pub end: usize,
-    pub line: u32,
-    pub column: u32,
-}
-
-impl Span {
-    pub fn new(start: usize, end: usize, line: u32, column: u32) -> Self {
-        Self { start, end, line, column }
-    }
-    
-    pub fn len(&self) -> usize {
-        self.end - self.start
-    }
-    
-    pub fn is_empty(&self) -> bool {
-        self.start == self.end
-    }
-}
+use crate::util::Span;
 
 /// Token types for COLANG lexical analysis
 #[derive(Logos, Debug, Clone, PartialEq)]
@@ -237,8 +215,7 @@ pub enum TokenType {
     #[regex(r"//[^\r\n]*", logos::skip)]
     #[regex(r"/\*([^*]|\*[^/])*\*/", logos::skip)]
     
-    // Error handling
-    #[error]
+    // Error handling (default for unrecognized tokens)
     Error,
     
     // End of file

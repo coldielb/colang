@@ -75,7 +75,7 @@ pub enum Expr {
     },
     
     /// Block expressions
-    Block(Vec<StatementNode>),
+    Block(Vec<StmtNode>),
     
     /// Assignment expressions
     Assign {
@@ -113,7 +113,7 @@ pub enum Expr {
     
     /// Lambda expressions
     Lambda {
-        params: Vec<Parameter>,
+        params: Vec<ExprParameter>,
         return_type: Option<TypeNode>,
         body: Box<ExprNode>,
     },
@@ -131,8 +131,8 @@ pub enum Expr {
 
 pub type ExprNode = Node<Expr>;
 
-use crate::ast::stmt::Statement;
-pub type StatementNode = Node<Statement>;
+// Forward declaration to avoid circular dependencies
+pub type StmtNode = crate::ast::Node<crate::ast::stmt::Statement>;
 
 /// Literal values
 #[derive(Debug, Clone, PartialEq)]
@@ -350,9 +350,9 @@ pub struct FieldPattern {
     pub pattern: Pattern,
 }
 
-/// Function parameter
+/// Function parameter for expressions (like lambda parameters)
 #[derive(Debug, Clone, PartialEq)]
-pub struct Parameter {
+pub struct ExprParameter {
     pub pattern: Pattern,
     pub param_type: Option<TypeNode>,
     pub default: Option<ExprNode>,
