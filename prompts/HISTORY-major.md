@@ -537,3 +537,33 @@ Your implementation is complete when:
 - Leverage the AST visitor pattern for tree traversal
 
 Once this phase is complete, the compiler will be able to catch most common programming errors and provide a solid foundation for code generation.
+
+## Phase 3: Code Generation
+
+Awesome. this is looking pretty good. Let's implement a fully working IR and code gen that is backend agnostic. this will allow colang to work on a varitey of target OSes and architectures.
+
+**IR Design Principles:**
+- Target-independent representation
+- Preserve type information for optimization
+- Use SSA form for efficient optimization
+- Support debugging information preservation
+
+**Code Generation Strategy:**
+- Generate readable LLVM IR initially
+- Implement basic optimizations (dead code elimination, constant folding)
+- Support C calling convention for interoperability
+- Include debug information generation
+
+**Task:** Create a working IR and basic LLVM backend with goal to move to a fully custom backend.
+
+**IR Implementation:**
+- Design SSA-form intermediate representation
+- Basic block construction and control flow graphs
+- Instruction definitions for COLANG operations
+- Type information preservation through IR
+
+**LLVM Backend:**
+- Generate LLVM IR for basic constructs
+- Function definition and calling conventions
+- Memory allocation and deallocation
+- Basic optimization passes
